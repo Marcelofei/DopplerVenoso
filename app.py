@@ -52,19 +52,23 @@ CSS_TEMA = """
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;650;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --color-ink: #0B2942;
-    --color-accent: #155E75;
-    --color-accent-soft: #E5EEF1;
-    --color-bg: #F7F9FA;
-    --color-surface: #FFFFFF;
-    --color-muted: #5B6B79;
-    --color-line: #DCE3E8;
-    --color-danger: #B91C1C;
-    --color-danger-soft: #FBEAEA;
-    --color-success: #0F766E;
-    --color-success-soft: #E6F2F0;
-    --color-warning: #B45309;
-    --color-warning-soft: #FDF1E1;
+    /* Tema escuro suave (graphite/slate) — pensado para uso prolongado em
+       ambiente clínico com baixa luminosidade ambiente. */
+    --color-bg: #0F172A;         /* fundo principal da página (slate-900) */
+    --color-surface: #1E293B;    /* cartões/painéis (slate-800) */
+    --color-surface-2: #243044;  /* superfícies um pouco mais claras (inputs, expanders) */
+    --color-ink: #E5E7EB;        /* texto principal claro */
+    --color-ink-soft: #CBD5E1;   /* texto secundário */
+    --color-muted: #94A3B8;      /* labels, hints */
+    --color-line: #334155;       /* divisores e bordas */
+    --color-accent: #38BDF8;     /* azul claro de destaque (sky-400) */
+    --color-accent-soft: #1E3A5F; /* fundo de tags/expanders abertos */
+    --color-danger: #F87171;     /* vermelho clínico claro (mais legível em fundo escuro) */
+    --color-danger-soft: #3F1D1D;
+    --color-success: #34D399;
+    --color-success-soft: #14302A;
+    --color-warning: #FBBF24;
+    --color-warning-soft: #3A2E10;
     --font-display: 'IBM Plex Sans', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
@@ -140,65 +144,85 @@ label { font-weight: 500 !important; font-size: 13.5px !important; color: var(--
 
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--color-surface); border: 1px solid var(--color-line);
-    border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 41, 66, 0.04);
+    border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .stTextArea textarea, .stTextInput input, .stNumberInput input {
-    background-color: var(--color-surface) !important; color: var(--color-ink) !important;
+    background-color: var(--color-surface-2) !important; color: var(--color-ink) !important;
     border: 1.5px solid var(--color-line) !important; border-radius: 7px !important;
     font-family: var(--font-mono) !important; font-size: 13.5px !important;
+}
+.stTextArea textarea::placeholder, .stTextInput input::placeholder, .stNumberInput input::placeholder {
+    color: var(--color-muted) !important; opacity: 0.7;
 }
 .stTextArea textarea:focus, .stTextInput input:focus, .stNumberInput input:focus {
     border-color: var(--color-accent) !important; box-shadow: 0 0 0 3px var(--color-accent-soft) !important;
 }
-.stSelectbox div[data-baseweb="select"], .stMultiSelect div[data-baseweb="select"] {
-    background-color: var(--color-surface) !important; border-radius: 7px !important;
+
+/* Selects e multiselects: fundo escuro tanto no campo quanto no popover de opções */
+.stSelectbox div[data-baseweb="select"] > div,
+.stMultiSelect div[data-baseweb="select"] > div {
+    background-color: var(--color-surface-2) !important;
+    border: 1.5px solid var(--color-line) !important;
+    border-radius: 7px !important;
+    color: var(--color-ink) !important;
 }
-span[data-baseweb="tag"] { background-color: var(--color-accent) !important; border-radius: 5px !important; }
+ul[role="listbox"], div[data-baseweb="popover"] ul, div[data-baseweb="menu"] {
+    background-color: var(--color-surface-2) !important;
+    border: 1px solid var(--color-line) !important;
+}
+ul[role="listbox"] li, div[data-baseweb="menu"] li {
+    background-color: transparent !important;
+    color: var(--color-ink) !important;
+}
+ul[role="listbox"] li:hover, div[data-baseweb="menu"] li:hover {
+    background-color: var(--color-accent-soft) !important;
+}
+span[data-baseweb="tag"] { background-color: var(--color-accent) !important; color: #0F172A !important; border-radius: 5px !important; }
+
+/* Radio/checkbox: marcadores precisam ser visíveis no escuro */
+.stRadio div[role="radiogroup"] label, .stCheckbox label { color: var(--color-ink) !important; }
 
 .streamlit-expanderHeader, div[data-testid="stExpander"] summary {
     background-color: var(--color-accent-soft) !important; border-radius: 8px !important;
     font-weight: 600 !important; color: var(--color-ink) !important;
 }
-div[data-testid="stExpander"] { border: 1px solid var(--color-line) !important; border-radius: 8px !important; }
+div[data-testid="stExpander"] {
+    border: 1px solid var(--color-line) !important; border-radius: 8px !important;
+    background-color: var(--color-surface) !important;
+}
+div[data-testid="stExpander"] > div { background-color: var(--color-surface) !important; }
 
 .stButton button {
     border-radius: 7px !important; font-weight: 600 !important; font-family: var(--font-body) !important;
-    border: 1.5px solid var(--color-line) !important; background-color: var(--color-surface) !important;
+    border: 1.5px solid var(--color-line) !important; background-color: var(--color-surface-2) !important;
     color: var(--color-ink) !important; transition: all 0.12s ease;
 }
 .stButton button:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
 
 button[kind="primary"] {
-    background-color: var(--color-danger) !important; color: white !important; border: none !important;
-    border-radius: 7px !important; box-shadow: 0 2px 6px -1px rgba(185, 28, 28, 0.35) !important;
+    background-color: var(--color-danger) !important; color: #0F172A !important; border: none !important;
+    border-radius: 7px !important; box-shadow: 0 2px 6px -1px rgba(248, 113, 113, 0.25) !important;
+    font-weight: 700 !important;
 }
-button[kind="primary"]:hover { background-color: #9B1818 !important; }
+button[kind="primary"]:hover { background-color: #FCA5A5 !important; }
 
 .stDownloadButton button, .copy-btn {
-    background-color: var(--color-success) !important; color: white !important; border-radius: 8px !important;
-    font-weight: 600 !important; font-family: var(--font-body) !important; height: 46px !important;
-    width: 100% !important; border: none !important; box-shadow: 0 4px 10px -3px rgba(15, 118, 110, 0.4) !important;
+    background-color: var(--color-success) !important; color: #0F172A !important; border-radius: 8px !important;
+    font-weight: 700 !important; font-family: var(--font-body) !important; height: 46px !important;
+    width: 100% !important; border: none !important; box-shadow: 0 4px 10px -3px rgba(52, 211, 153, 0.25) !important;
     cursor: pointer; transition: background-color 0.12s ease;
 }
-.stDownloadButton button:hover, .copy-btn:hover { background-color: #0B5C56 !important; }
+.stDownloadButton button:hover, .copy-btn:hover { background-color: #6EE7B7 !important; }
 
+/* Alerts (st.warning / st.error / st.info / st.success) com cores legíveis no escuro */
 div[data-testid="stAlert"] { border-radius: 8px !important; border-left: 4px solid var(--color-accent) !important; }
-div[data-testid="stAlert"] p { font-weight: 500 !important; }
+div[data-testid="stAlert"], div[data-testid="stAlertContainer"] {
+    background-color: var(--color-surface-2) !important;
+}
+div[data-testid="stAlert"] p, div[data-testid="stAlert"] div { color: var(--color-ink) !important; font-weight: 500 !important; }
+
 hr { border-color: var(--color-line) !important; margin: 22px 0 !important; }
-
-.legenda-venograma {
-    display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px;
-    font-family: var(--font-mono); font-size: 11.5px; color: var(--color-muted);
-}
-.legenda-item { display: flex; align-items: center; gap: 6px; }
-.legenda-cor { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
-
-.dica-ajuda {
-    background: var(--color-accent-soft); border-left: 3px solid var(--color-accent);
-    border-radius: 6px; padding: 10px 14px; font-size: 12.5px; color: var(--color-ink) !important;
-    margin: 6px 0 14px 0;
-}
 </style>
 """
 
@@ -317,19 +341,6 @@ AJUDA = {
     ),
     "drenagem": "Para onde o sangue que está refluindo está sendo desviado/escoado.",
     "distancia_cm": "Distância em centímetros até o ponto de referência indicado ao lado.",
-    "perfurantes": (
-        "Veias perfurantes atravessam o músculo conectando o sistema superficial "
-        "ao profundo. Quando 'insuficientes', também causam varizes e ficam "
-        "marcadas como pontos no desenho da perna."
-    ),
-    "biometria": "Medidas do calibre (diâmetro) da veia em cada ponto, em centímetros.",
-    "flebite": "Inflamação da veia com formação de coágulo dentro dela, geralmente na veia safena.",
-    "venograma_auto": (
-        "Este desenho é gerado automaticamente a partir do que você preencheu "
-        "acima. Azul = normal, vermelho = refluxo, preto = trombo, pontos = "
-        "perfurantes. Você ainda pode desenhar por cima manualmente, se quiser "
-        "ajustar ou adicionar algo."
-    ),
 }
 
 
@@ -387,264 +398,25 @@ CHAVES_ESTADO_PACIENTE = ["perf_list", "magna_seg_list", "seg_k", "protocolo_num
 
 
 # =====================================================================
-# 3. VENOGRAMA AUTOMÁTICO (overlay sobre imagem anatômica de referência)
+# 3. VENOGRAMA — imagem anatômica como fundo do canvas editável
 # =====================================================================
-# A imagem `base_venograma.png` deve estar na raiz do repositório.
-# É o template anatômico real (3 painéis: SUPERFICIAL-JSF, SUPERFICIAL,
-# SISTEMA PROFUNDO), com MID e MIE em cada painel. Ao carregar, este
-# código desenha em CIMA da imagem os traços coloridos correspondentes
-# aos achados do exame e os pontos de perfurante, e devolve uma PIL.Image
-# pronta — que é usada tanto para exibição estática quanto como background
-# do canvas editável (para a assistente desenhar ajustes manuais por cima).
-#
-# Cores: azul = normal/competente, vermelho = refluxo/perfurante,
-# preto = trombo.
-
-COR_NORMAL = (21, 94, 117, 255)      # azul (#155E75)
-COR_REFLUXO = (185, 28, 28, 255)     # vermelho (#B91C1C)
-COR_TROMBO = (11, 19, 32, 255)       # preto/grafite (#0B1320)
-COR_PERFURANTE = (185, 28, 28, 255)  # vermelho (mesmo do refluxo, conforme pedido)
+# A imagem `base_venograma.png` (template com os 3 painéis SUPERFICIAL-JSF /
+# SUPERFICIAL / SISTEMA PROFUNDO, MID e MIE em cada um) é carregada da raiz
+# do repositório e usada como fundo do canvas onde a assistente desenha
+# manualmente — não há mais overlay automático com base nos dados do exame.
 
 LARGURA_BASE = 1180
 ALTURA_BASE = 680
-LARGURA_TRACO = 6
-RAIO_PONTO = 9
-
-# --- Coordenadas calibradas sobre a imagem base 1180x680 ---
-# Calibradas visualmente conferindo os marcos anatômicos (virilha, joelho,
-# tornozelo) sobre os pontos brancos do template original. Cada painel
-# tem suas próprias coordenadas porque os 3 painéis não são alinhados
-# pixel-a-pixel entre si na imagem fonte.
-#
-# Convenção: P1 e P3 mostram MID à esquerda do painel e MIE à direita;
-# P2 está invertido (MIE à esquerda, MID à direita) como na imagem original.
-
-COORDS_VENOGRAMA = {
-    "P1": {  # Superficial-JSF
-        "MID":  {"virilha": (135, 110), "joelho": (130, 350), "tornozelo": (130, 600)},
-        "MIE":  {"virilha": (245, 110), "joelho": (250, 350), "tornozelo": (255, 600)},
-    },
-    "P2": {  # Superficial
-        "MIE":  {"virilha": (510, 240), "joelho": (510, 390), "tornozelo": (520, 595)},
-        "MID":  {"virilha": (650, 240), "joelho": (650, 390), "tornozelo": (640, 595)},
-    },
-    "P3": {  # Sistema Profundo
-        "MID":  {"virilha": (920, 100), "joelho": (915, 360), "tornozelo": (905, 595)},
-        "MIE":  {"virilha": (1060, 100), "joelho": (1065, 360), "tornozelo": (1075, 595)},
-    },
-}
-
-# Onde cada nome de segmento clínico cai ao longo da trilha virilha→joelho→tornozelo
-# (valor entre 0 = virilha e 1 = tornozelo). Coxa = 0..joelho, Perna = joelho..tornozelo.
-FRACAO_SEGMENTO = {
-    "proximal da coxa": 0.10, "médio da coxa": 0.25, "distal da coxa": 0.40,
-    "proximal da perna": 0.58, "médio da perna": 0.75, "distal da perna": 0.92,
-}
-FRACAO_JOELHO = 0.50  # ponto onde a coxa termina e a perna começa
-FRACAO_PARVA_INICIO = 0.52  # safena parva começa logo abaixo do joelho
 
 
-def _interpolar(p1: tuple[int, int], p2: tuple[int, int], t: float) -> tuple[int, int]:
-    """Interpola linearmente entre dois pontos."""
-    return (
-        int(p1[0] + (p2[0] - p1[0]) * t),
-        int(p1[1] + (p2[1] - p1[1]) * t),
-    )
-
-
-def _ponto_na_trilha(painel: str, lado: str, fracao: float) -> tuple[int, int]:
-    """
-    Posição (x, y) na imagem base correspondente a uma fração 0..1 da
-    trilha anatômica virilha→joelho→tornozelo, no painel/lado indicados.
-    """
-    marcos = COORDS_VENOGRAMA[painel][lado]
-    if fracao <= FRACAO_JOELHO:
-        # coxa: virilha (fracao=0) -> joelho (fracao=FRACAO_JOELHO)
-        t = fracao / FRACAO_JOELHO if FRACAO_JOELHO > 0 else 0
-        return _interpolar(marcos["virilha"], marcos["joelho"], t)
-    # perna: joelho -> tornozelo
-    t = (fracao - FRACAO_JOELHO) / (1.0 - FRACAO_JOELHO)
-    return _interpolar(marcos["joelho"], marcos["tornozelo"], t)
-
-
-def _fracao_para_segmento(segmento: str) -> float:
-    return FRACAO_SEGMENTO.get(segmento, 0.5)
-
-
-def _carregar_base() -> Image.Image:
-    """Carrega a imagem do template anatômico, ou cria fundo neutro se ausente."""
+def _carregar_base_venograma() -> Image.Image:
+    """Carrega o template anatômico. Se ausente, devolve um fundo neutro."""
     caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), "base_venograma.png")
     if os.path.exists(caminho):
         return Image.open(caminho).convert("RGBA")
-    # Fallback: fundo branco com aviso (não quebra o app se o asset não foi subido ainda)
-    bg = Image.new("RGBA", (LARGURA_BASE, ALTURA_BASE), (245, 247, 250, 255))
-    return bg
-
-
-def _desenhar_segmento_magna(draw: ImageDraw.ImageDraw, painel: str, lado: str, dados: DadosExame) -> None:
-    """Desenha o trajeto da safena magna (virilha → tornozelo) com cores conforme achados."""
-    achados = dados.achados_superficiais
-
-    def linha(f1, f2, cor):
-        p1 = _ponto_na_trilha(painel, lado, f1)
-        p2 = _ponto_na_trilha(painel, lado, f2)
-        draw.line([p1, p2], fill=cor, width=LARGURA_TRACO)
-
-    if "Safenectomia Magna Total" in achados:
-        return  # nada a desenhar
-    if "Safenectomia Magna Parcial" in achados:
-        # mantém apenas o terço distal da perna
-        linha(0.80, 1.00, COR_NORMAL)
-        return
-    if "Safena Magna - Incompetência Total" in achados:
-        linha(0.0, 1.0, COR_REFLUXO)
-        return
-    if dados.algum(["Safena Magna - Incompetência Parcial", "Safena Magna - Incompetência Segmentar"]):
-        f_inicio = 0.0 if dados.magna_jsf_incompetente else _fracao_para_segmento(dados.magna_seg_origem)
-        f_fim = _fracao_para_segmento(dados.magna_seg_extensao)
-        f_a, f_b = min(f_inicio, f_fim), max(f_inicio, f_fim)
-        if f_a > 0:
-            linha(0, f_a, COR_NORMAL)
-        if f_b > f_a:
-            linha(f_a, f_b, COR_REFLUXO)
-        if f_b < 1.0:
-            linha(f_b, 1.0, COR_NORMAL)
-        for seg in dados.magna_segmentos_extra:
-            fs = _fracao_para_segmento(seg.seg_origem)
-            fe = _fracao_para_segmento(seg.seg_extensao)
-            linha(min(fs, fe), max(fs, fe), COR_REFLUXO)
-        return
-
-    linha(0.0, 1.0, COR_NORMAL)
-
-
-def _desenhar_segmento_parva(draw: ImageDraw.ImageDraw, painel: str, lado: str, dados: DadosExame) -> None:
-    """Desenha o trajeto da safena parva (do joelho ao tornozelo) — só faz sentido no Painel 2."""
-    achados = dados.achados_superficiais
-
-    def linha(f1, f2, cor):
-        # Parva existe só a partir do joelho; deslocamos lateralmente um pouco
-        # para não ficar exatamente em cima da magna no mesmo painel.
-        p1 = _ponto_na_trilha(painel, lado, f1)
-        p2 = _ponto_na_trilha(painel, lado, f2)
-        # deslocamento lateral (para fora do corpo) — direção depende do lado
-        dx = 9 if lado == "MID" else -9
-        draw.line([(p1[0] + dx, p1[1]), (p2[0] + dx, p2[1])], fill=cor, width=LARGURA_TRACO)
-
-    if "Safenectomia Parva Total" in achados:
-        return
-    if "Safenectomia Parva Parcial" in achados:
-        linha(0.75, 1.0, COR_NORMAL)
-        return
-    if "Safena Parva - Incompetência Total" in achados:
-        linha(FRACAO_PARVA_INICIO, 1.0, COR_REFLUXO)
-        return
-    if "Safena Parva - Incompetência Parcial" in achados:
-        f_fim = max(FRACAO_PARVA_INICIO, _fracao_para_segmento(dados.parva_extensao_segmento))
-        linha(FRACAO_PARVA_INICIO, f_fim, COR_REFLUXO)
-        if f_fim < 1.0:
-            linha(f_fim, 1.0, COR_NORMAL)
-        return
-
-    linha(FRACAO_PARVA_INICIO, 1.0, COR_NORMAL)
-
-
-def _desenhar_segmento_profundo(draw: ImageDraw.ImageDraw, painel: str, lado: str, dados: DadosExame) -> None:
-    """Desenha o trajeto do sistema profundo (preto se trombose, azul se normal)."""
-    cor = COR_TROMBO if (dados.sp_status == "Não" and dados.sp_veias) else COR_NORMAL
-    largura = LARGURA_TRACO + 2 if cor == COR_TROMBO else LARGURA_TRACO
-    p1 = _ponto_na_trilha(painel, lado, 0.0)
-    p2 = _ponto_na_trilha(painel, lado, 0.5)
-    p3 = _ponto_na_trilha(painel, lado, 1.0)
-    draw.line([p1, p2], fill=cor, width=largura)
-    draw.line([p2, p3], fill=cor, width=largura)
-
-
-def _desenhar_ponto_jsf(draw: ImageDraw.ImageDraw, painel: str, lado: str, dados: DadosExame) -> None:
-    """Marca a Junção Safenofemoral (bolinha na virilha) — vermelha se incompetente."""
-    jsf_incompetente = (
-        "Safena Magna - Incompetência Total" in dados.achados_superficiais
-        or (dados.algum(["Safena Magna - Incompetência Parcial", "Safena Magna - Incompetência Segmentar"])
-            and dados.magna_jsf_incompetente)
-    )
-    cor = COR_REFLUXO if jsf_incompetente else COR_NORMAL
-    x, y = _ponto_na_trilha(painel, lado, 0.0)
-    r = RAIO_PONTO + 1
-    draw.ellipse([x - r, y - r, x + r, y + r], fill=cor, outline=(255, 255, 255, 255), width=2)
-
-
-def _desenhar_perfurantes(draw: ImageDraw.ImageDraw, painel: str, lado: str, dados: DadosExame) -> None:
-    """Marca as perfurantes insuficientes como bolinhas vermelhas no Painel 2 (superficial)."""
-    contador: dict[tuple[str, str], int] = {}
-    for p in dados.perfurantes:
-        chave = (p.localizacao_norm, p.face.lower())
-        idx = contador.get(chave, 0)
-        contador[chave] = idx + 1
-
-        # Localização aproximada: 0.25 (coxa) ou 0.75 (perna) na trilha,
-        # com deslocamento vertical para perfurantes repetidas na mesma região
-        fracao_base = 0.30 if p.localizacao_norm == "coxa" else 0.78
-        fracao = min(0.95, fracao_base + idx * 0.06)
-        x, y = _ponto_na_trilha(painel, lado, fracao)
-        # Deslocamento lateral conforme face medial/lateral
-        dx = -12 if p.face.lower() in ("medial", "anterior") else 12
-        if lado == "MIE":
-            dx = -dx
-        r = RAIO_PONTO
-        draw.ellipse(
-            [x + dx - r, y - r, x + dx + r, y + r],
-            fill=COR_PERFURANTE, outline=(255, 255, 255, 255), width=2,
-        )
-
-
-def desenhar_venograma(dados: DadosExame) -> Image.Image:
-    """
-    Gera a imagem completa do venograma: imagem base + overlay clínico.
-    Retorna uma PIL.Image RGBA pronta para exibir ou usar como background de canvas.
-    """
-    base = _carregar_base().copy()
-    overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
-
-    lado_alvo = "MID" if dados.lateralidade == "Direito" else "MIE"
-    lado_outro = "MIE" if lado_alvo == "MID" else "MID"
-
-    # Painel 1 (Superficial-JSF): trajeto da magna + ponto JSF
-    for lado in ("MID", "MIE"):
-        dados_lado = dados if lado == lado_alvo else None
-        if dados_lado is None:
-            # Lado não examinado: desenha em azul normal (sem dados clínicos para ele)
-            p1 = _ponto_na_trilha("P1", lado, 0.0)
-            p2 = _ponto_na_trilha("P1", lado, 1.0)
-            draw.line([p1, p2], fill=COR_NORMAL, width=LARGURA_TRACO)
-            x, y = p1
-            r = RAIO_PONTO + 1
-            draw.ellipse([x-r, y-r, x+r, y+r], fill=COR_NORMAL, outline=(255,255,255,255), width=2)
-        else:
-            _desenhar_segmento_magna(draw, "P1", lado, dados)
-            _desenhar_ponto_jsf(draw, "P1", lado, dados)
-
-    # Painel 2 (Superficial): magna + parva + perfurantes
-    for lado in ("MID", "MIE"):
-        if lado != lado_alvo:
-            p1 = _ponto_na_trilha("P2", lado, 0.0)
-            p2 = _ponto_na_trilha("P2", lado, 1.0)
-            draw.line([p1, p2], fill=COR_NORMAL, width=LARGURA_TRACO)
-        else:
-            _desenhar_segmento_magna(draw, "P2", lado, dados)
-            _desenhar_segmento_parva(draw, "P2", lado, dados)
-            _desenhar_perfurantes(draw, "P2", lado, dados)
-
-    # Painel 3 (Sistema Profundo)
-    for lado in ("MID", "MIE"):
-        if lado != lado_alvo:
-            p1 = _ponto_na_trilha("P3", lado, 0.0)
-            p2 = _ponto_na_trilha("P3", lado, 1.0)
-            draw.line([p1, p2], fill=COR_NORMAL, width=LARGURA_TRACO)
-        else:
-            _desenhar_segmento_profundo(draw, "P3", lado, dados)
-
-    return Image.alpha_composite(base, overlay)
+    # Fallback: fundo escuro para combinar com o tema (app não quebra se o
+    # asset não foi subido ao repositório).
+    return Image.new("RGBA", (LARGURA_BASE, ALTURA_BASE), (30, 41, 59, 255))
 
 
 def venograma_para_bytes(img: Image.Image) -> bytes:
@@ -652,7 +424,6 @@ def venograma_para_bytes(img: Image.Image) -> bytes:
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
-
 
 # =====================================================================
 # 4. ESTADO AGREGADO DO EXAME + GERAÇÃO DE TEXTO DO LAUDO
@@ -689,12 +460,12 @@ class DadosExame:
     flebite_extensao_cm: str = ""
 
     bio_safenectomia_parcial: bool = False
-    bio_coxa_distal: str = "xxx"
-    bio_perna_proximal_posop: str = "xxx"
-    bio_crossa: str = "0,6"
-    bio_coxa: str = "xxx"
-    bio_perna: str = "xxx"
-    medida_parva_cm: str = "0,2"
+    bio_coxa_distal: str = ""
+    bio_perna_proximal_posop: str = ""
+    bio_crossa: str = ""
+    bio_coxa: str = ""
+    bio_perna: str = ""
+    medida_parva_cm: str = ""
 
     perfurantes: list[DadosPerfurante] = field(default_factory=list)
 
@@ -787,10 +558,16 @@ def gerar_secao_profundo(d: DadosExame) -> tuple[str, str]:
     return descricao, impressao
 
 
+def _med(valor: str) -> str:
+    """Retorna o valor da medida ou '___' se estiver vazio — evita laudo com 'Mede  cm'."""
+    valor = (valor or "").strip()
+    return valor if valor else "___"
+
+
 def gerar_texto_biometria_magna(d: DadosExame) -> str:
     if d.bio_safenectomia_parcial:
-        return f"Mede {d.bio_coxa_distal} cm (coxa distal) e {d.bio_perna_proximal_posop} cm (perna proximal)."
-    return f"Mede {d.bio_crossa} cm (crossa), {d.bio_coxa} cm (coxa) e {d.bio_perna} cm (perna)."
+        return f"Mede {_med(d.bio_coxa_distal)} cm (coxa distal) e {_med(d.bio_perna_proximal_posop)} cm (perna proximal)."
+    return f"Mede {_med(d.bio_crossa)} cm (crossa), {_med(d.bio_coxa)} cm (coxa) e {_med(d.bio_perna)} cm (perna)."
 
 
 def gerar_secao_magna(d: DadosExame) -> tuple[str, str, str]:
@@ -870,7 +647,7 @@ def gerar_secao_parva(d: DadosExame) -> tuple[str, str]:
             "Veia safena parva não caracterizada nos segmentos proximal/médio da "
             "perna (status pós-operatório). Demais segmentos pérvios."
         )
-        completo = f"{base}.\nMede {d.medida_parva_cm} cm (perna proximal)."
+        completo = f"{base}.\nMede {_med(d.medida_parva_cm)} cm (perna proximal)."
         return completo, "- Sinais de safenectomia parva parcial."
 
     if "Safena Parva - Incompetência Total" in achados:
@@ -896,7 +673,7 @@ def gerar_secao_parva(d: DadosExame) -> tuple[str, str]:
             f"{d.flebite_extensao_cm} cm"
         )
 
-    completo = f"{base}.\nMede {d.medida_parva_cm} cm (perna proximal)."
+    completo = f"{base}.\nMede {_med(d.medida_parva_cm)} cm (perna proximal)."
     return completo, impressao
 
 
@@ -1010,11 +787,6 @@ def titulo_secao(numero: str, titulo: str, descricao: str = "") -> None:
     )
 
 
-def dica(texto: str) -> None:
-    """Caixa de dica/explicação visível diretamente na tela (não só tooltip)."""
-    st.markdown(f'<div class="dica-ajuda">💡 {html.escape(texto)}</div>', unsafe_allow_html=True)
-
-
 # =====================================================================
 # 6. SEÇÕES DA INTERFACE
 # =====================================================================
@@ -1099,7 +871,6 @@ def secao_detalhes_magna(achados_sup: list[str], d: DadosExame) -> None:
 def _ui_segmentos_extra_magna() -> list[SegmentoMagnaExtra]:
     st.markdown("---")
     st.markdown("**Adicionar Novo Segmento Insuficiente**")
-    dica("Use isso quando a veia volta a ficar incompetente em mais de um trecho separado, não num trajeto único.")
     k = st.session_state.seg_k
     c1, c2 = st.columns(2)
     s_origem = c1.selectbox("Nova Origem:", ORIGENS_REFLUXO, key=f"o_{k}")
@@ -1159,7 +930,6 @@ def secao_detalhes_flebite(achados_sup: list[str], d: DadosExame) -> None:
     with st.expander("Detalhes Adicionais — Tromboflebite / Varizes", expanded=True):
         if not precisa_flebite:
             return
-        dica(AJUDA["flebite"])
         d.flebite_veia = st.selectbox("Veia com flebite:", VEIAS_FLEBITE)
         d.flebite_local = st.selectbox("Localização:", LOCALIZACOES_MEMBRO)
         d.flebite_face = st.selectbox("Face:", FACES_MEMBRO)
@@ -1168,27 +938,25 @@ def secao_detalhes_flebite(achados_sup: list[str], d: DadosExame) -> None:
 
 def secao_biometria(achados_sup: list[str], d: DadosExame) -> None:
     titulo_secao("03", "Biometria Vascular", "Medidas das veias safenas")
-    dica(AJUDA["biometria"])
     st.markdown("**Veia Safena Magna**")
 
     d.bio_safenectomia_parcial = "Safenectomia Magna Parcial" in achados_sup
     if d.bio_safenectomia_parcial:
         c1, c2 = st.columns(2)
-        d.bio_coxa_distal = c1.text_input("Coxa distal (cm)", "xxx")
-        d.bio_perna_proximal_posop = c2.text_input("Perna proximal (cm)", "xxx")
+        d.bio_coxa_distal = c1.text_input("Coxa distal (cm)", value="", placeholder="ex: 0,5")
+        d.bio_perna_proximal_posop = c2.text_input("Perna proximal (cm)", value="", placeholder="ex: 0,3")
     else:
         c1, c2, c3 = st.columns(3)
-        d.bio_crossa = c1.text_input("Crossa (cm)", "0,6")
-        d.bio_coxa = c2.text_input("Coxa (cm)", "xxx")
-        d.bio_perna = c3.text_input("Perna (cm)", "xxx")
+        d.bio_crossa = c1.text_input("Crossa (cm)", value="", placeholder="ex: 0,6")
+        d.bio_coxa = c2.text_input("Coxa (cm)", value="", placeholder="ex: 0,5")
+        d.bio_perna = c3.text_input("Perna (cm)", value="", placeholder="ex: 0,3")
 
     st.markdown("**Veia Safena Parva**")
-    d.medida_parva_cm = st.text_input("Perna Proximal (cm)", "0,2")
+    d.medida_parva_cm = st.text_input("Perna Proximal (cm)", value="", placeholder="ex: 0,2")
 
 
 def secao_perfurantes() -> list[DadosPerfurante]:
     titulo_secao("04", "Veias Perfurantes", "Pontos de insuficiência identificados")
-    dica(AJUDA["perfurantes"])
 
     tem_perf = st.radio("Existem perfurantes insuficientes?", ["Não", "Sim"], horizontal=True)
     if tem_perf == "Sim":
@@ -1236,48 +1004,22 @@ def secao_laudo_editavel(laudo_final: str) -> None:
 
 
 def secao_venograma(d: DadosExame) -> None:
-    titulo_secao("06", "Venograma", "Mapa anatômico anotado automaticamente")
-    dica(AJUDA["venograma_auto"])
+    titulo_secao("06", "Venograma", "Anotação manual sobre o mapa anatômico")
 
-    # Gera a imagem do venograma com as marcações automáticas (azul=normal,
-    # vermelho=refluxo/perfurante, preto=trombo) sobrepostas na imagem
-    # anatômica de referência. Esta mesma imagem servirá como fundo do
-    # canvas, permitindo à assistente desenhar ajustes manuais por cima
-    # — não há mais "imagem automática" + "canvas separado", é tudo um só.
-    venograma_img = desenhar_venograma(d)
-
-    # Legenda
-    st.markdown(
-        """
-        <div class="legenda-venograma">
-            <span class="legenda-item"><span class="legenda-cor" style="background:#155E75;"></span>Normal (azul)</span>
-            <span class="legenda-item"><span class="legenda-cor" style="background:#B91C1C;"></span>Refluxo (vermelho)</span>
-            <span class="legenda-item"><span class="legenda-cor" style="background:#0B1320;"></span>Trombo (preto)</span>
-            <span class="legenda-item"><span class="legenda-cor" style="background:#B91C1C; border-radius:50%;"></span>Perfurante (bolinha vermelha)</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    fundo = _carregar_base_venograma()
 
     if not CANVAS_DISPONIVEL:
-        # Fallback: se a biblioteca de canvas não está instalada, mostra só a imagem estática.
         st.info(
-            "Desenho manual indisponível (biblioteca `streamlit-drawable-canvas-fix` "
-            "não instalada neste ambiente). O venograma automático abaixo continua funcionando."
+            "Desenho indisponível neste ambiente (biblioteca "
+            "`streamlit-drawable-canvas-fix` não instalada). Exibindo o "
+            "template anatômico estático."
         )
-        st.image(venograma_img, use_container_width=True)
+        st.image(fundo, use_container_width=True)
         st.download_button(
-            "Baixar venograma (PNG)", venograma_para_bytes(venograma_img),
+            "Baixar venograma (PNG)", venograma_para_bytes(fundo),
             "venograma.png", "image/png", use_container_width=True,
         )
         return
-
-    st.markdown("**Ajuste manual (opcional)**")
-    dica(
-        "Você pode desenhar diretamente em cima do venograma automático para "
-        "adicionar ou ajustar qualquer marcação. As alterações ficam sobre a "
-        "mesma figura — não é um desenho separado."
-    )
 
     t1, t2, t3 = st.columns([1.2, 2.2, 1.2])
     tool = t1.selectbox("Ferramenta:", FERRAMENTAS_DESENHO, format_func=lambda x: LABEL_FERRAMENTA[x])
@@ -1285,51 +1027,37 @@ def secao_venograma(d: DadosExame) -> None:
     peso = t3.slider("Espessura:", 1, 20, 6)
     stroke = STROKE_POR_COR[cor]
 
-    # O canvas usa exatamente a imagem do venograma automático como background.
-    # Assim, qualquer traço manual da assistente é desenhado SOBRE o mapa já
-    # marcado — não há mais "duas figuras separadas".
-    largura_canvas = LARGURA_BASE
-    altura_canvas = ALTURA_BASE
-
     canvas_result = st_canvas(
         fill_color="rgba(255, 255, 255, 0)",
         stroke_width=peso,
         stroke_color=stroke,
-        background_image=venograma_img,
-        height=altura_canvas,
-        width=largura_canvas,
+        background_image=fundo,
+        height=ALTURA_BASE,
+        width=LARGURA_BASE,
         drawing_mode=tool,
         update_streamlit=True,
         key="canvas_venograma",
     )
 
-    # Combina o desenho manual (overlay do canvas) com o venograma automático
-    # para gerar a imagem final baixável — é literalmente a figura completa.
-    #
-    # IMPORTANTE: o streamlit-drawable-canvas retorna `image_data` com as
-    # dimensões REAIS de renderização no navegador (que podem diferir dos
-    # `width`/`height` que pedimos, dependendo do dispositivo/zoom/DPR).
-    # Por isso precisamos redimensionar o overlay manual para o tamanho do
-    # venograma antes de compor — caso contrário Pillow levanta
-    # "ValueError: images do not match".
-    final = venograma_img
+    # Compõe a imagem final para download: fundo do template + traços manuais.
+    # O canvas pode retornar image_data em dimensões diferentes das pedidas
+    # (depende do DPR/zoom do navegador), então redimensionamos antes de
+    # compor para evitar "ValueError: images do not match" do Pillow.
+    final = fundo
     if canvas_result.image_data is not None:
         try:
             manual = Image.fromarray(canvas_result.image_data.astype("uint8"), "RGBA")
-            base_rgba = venograma_img.convert("RGBA")
+            base_rgba = fundo.convert("RGBA")
             if manual.size != base_rgba.size:
                 manual = manual.resize(base_rgba.size, Image.LANCZOS)
             final = Image.alpha_composite(base_rgba, manual)
         except (ValueError, OSError) as e:
-            # Em caso de qualquer erro na composição, cai de volta para a
-            # imagem do venograma automático sem o overlay manual — o app
-            # continua usável, só perde os traços feitos manualmente.
             st.warning(
-                "Não foi possível combinar o desenho manual com o venograma. "
-                "O download a seguir contém apenas as marcações automáticas. "
+                "Não foi possível combinar o desenho com o template. O "
+                "download abaixo contém apenas o template em branco. "
                 f"(Detalhe técnico: {type(e).__name__})"
             )
-            final = venograma_img
+            final = fundo
 
     st.download_button(
         "Baixar venograma (PNG)", venograma_para_bytes(final),
