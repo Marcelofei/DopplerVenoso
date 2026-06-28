@@ -1305,18 +1305,36 @@ def secao_venograma(d: DadosExame) -> None:
 
     # Combina o desenho manual (overlay do canvas) com o venograma automático
     # para gerar a imagem final baixável — é literalmente a figura completa.
+    #
+    # IMPORTANTE: o streamlit-drawable-canvas retorna `image_data` com as
+    # dimensões REAIS de renderização no navegador (que podem diferir dos
+    # `width`/`height` que pedimos, dependendo do dispositivo/zoom/DPR).
+    # Por isso precisamos redimensionar o overlay manual para o tamanho do
+    # venograma antes de compor — caso contrário Pillow levanta
+    # "ValueError: images do not match".
+    final = venograma_img
     if canvas_result.image_data is not None:
-        manual = Image.fromarray(canvas_result.image_data.astype("uint8"), "RGBA")
-        final = Image.alpha_composite(venograma_img.convert("RGBA"), manual)
-        st.download_button(
-            "Baixar venograma (PNG)", venograma_para_bytes(final),
-            "venograma.png", "image/png", use_container_width=True,
-        )
-    else:
-        st.download_button(
-            "Baixar venograma (PNG)", venograma_para_bytes(venograma_img),
-            "venograma.png", "image/png", use_container_width=True,
-        )
+        try:
+            manual = Image.fromarray(canvas_result.image_data.astype("uint8"), "RGBA")
+            base_rgba = venograma_img.convert("RGBA")
+            if manual.size != base_rgba.size:
+                manual = manual.resize(base_rgba.size, Image.LANCZOS)
+            final = Image.alpha_composite(base_rgba, manual)
+        except (ValueError, OSError) as e:
+            # Em caso de qualquer erro na composição, cai de volta para a
+            # imagem do venograma automático sem o overlay manual — o app
+            # continua usável, só perde os traços feitos manualmente.
+            st.warning(
+                "Não foi possível combinar o desenho manual com o venograma. "
+                "O download a seguir contém apenas as marcações automáticas. "
+                f"(Detalhe técnico: {type(e).__name__})"
+            )
+            final = venograma_img
+
+    st.download_button(
+        "Baixar venograma (PNG)", venograma_para_bytes(final),
+        "venograma.png", "image/png", use_container_width=True,
+    )
 
 
 # =====================================================================
