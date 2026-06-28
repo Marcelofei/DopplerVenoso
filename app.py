@@ -121,6 +121,23 @@ h1, h2, h3 { font-family: var(--font-display) !important; }
 label, p, span, .stMarkdown { color: var(--color-ink) !important; }
 label { font-weight: 500 !important; font-size: 13.5px !important; color: var(--color-muted) !important; }
 
+/* Exceções: textos dentro do cabeçalho escuro precisam permanecer claros.
+   Sem isso, a regra genérica "p, span { color: var(--color-ink) }" acima
+   vence as cores claras definidas em .laudo-header__*, deixando o texto
+   praticamente invisível (azul escuro sobre fundo azul escuro). */
+.laudo-header__eyebrow,
+.laudo-header__title,
+.laudo-header__sub,
+.laudo-header__meta-label,
+.laudo-header__meta-value {
+    color: inherit !important;
+}
+.laudo-header__eyebrow { color: #9FC4D6 !important; }
+.laudo-header__title { color: #FFFFFF !important; }
+.laudo-header__sub { color: #C7D9E2 !important; }
+.laudo-header__meta-label { color: #7FA8BC !important; }
+.laudo-header__meta-value { color: #EAF2F5 !important; }
+
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--color-surface); border: 1px solid var(--color-line);
     border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 41, 66, 0.04);
@@ -372,43 +389,75 @@ CHAVES_ESTADO_PACIENTE = ["perf_list", "magna_seg_list", "seg_k", "protocolo_num
 # =====================================================================
 # 3. VENOGRAMA AUTOMÁTICO (SVG gerado a partir dos dados do exame)
 # =====================================================================
-# Mapa anatômico esquemático do membro inferior, em coordenadas fixas de
-# um viewBox de 400x760. Eixo vertical normalizado de 0 (virilha) a 1
-# (tornozelo) para cada "trilha" (profunda, magna, parva), permitindo
-# converter "segmento + distância" em uma posição aproximada no desenho.
+# Layout em 3 painéis, inspirado no mapa anatômico de referência usado
+# durante o exame: as DUAS pernas aparecem lado a lado em cada painel
+# (MID = membro inferior direito, MIE = membro inferior esquerdo), com a
+# virilha no topo e o pé na base. Isso permite comparar os dois lados
+# mesmo quando o laudo sendo preenchido é só de um membro.
+#
+#   Painel 1 — Superficial / Junção Safeno-Femoral (trajeto da magna)
+#   Painel 2 — Superficial (magna + parva + perfurantes)
+#   Painel 3 — Sistema Profundo (VFC/VFP/VFS/VP/VG/VTA/VTP)
 #
 # Isto é uma representação ESQUEMÁTICA (não anatomicamente exata) — serve
 # para visualização rápida durante o exame, não para fins de imagem médica
 # diagnóstica por si só.
 
-COR_NORMAL = "#155E75"   # azul — trajeto normal/competente
-COR_REFLUXO = "#B91C1C"  # vermelho — incompetência/refluxo
-COR_TROMBO = "#0B1320"   # preto/grafite — trombose
+COR_NORMAL = "#155E75"      # azul — trajeto normal/competente
+COR_REFLUXO = "#B91C1C"     # vermelho — incompetência/refluxo
+COR_TROMBO = "#0B1320"      # preto/grafite — trombose
 COR_PERFURANTE = "#B45309"  # âmbar — ponto de perfurante insuficiente
+COR_GUIA = "#9AA7AF"        # cinza — silhueta/linhas guia (não clínico)
 
-# Eixo Y de cada trilha: (y_topo, y_base) dentro do viewBox 0..760
-EIXO_PROFUNDO = (60, 700)
-EIXO_MAGNA = (90, 660)
-EIXO_PARVA = (380, 660)  # safena parva só existe na perna (a partir do joelho)
+# --- Geometria base de UMA perna dentro de um painel (coordenadas locais,
+# origem em x=0 na linha média do corpo, y=0 na virilha, y cresce para baixo) ---
+ALTURA_PERNA = 600        # da virilha (y=0) ao tornozelo (y=600)
+Y_JOELHO = 330            # divide coxa (acima) de perna (abaixo)
+X_VIRILHA = 26            # afastamento da linha média na virilha (abertura do "V")
+X_JOELHO = 50             # afastamento na altura do joelho (parte mais larga)
+X_TORNOZELO = 32          # afastamento no tornozelo
+MARGEM_BORDA = 6          # margem interna mínima entre o contorno e qualquer trilha
+SEPARACAO_PERNAS = 16     # afastamento horizontal extra entre a perna esquerda e a direita
 
-Y_JOELHO = 420  # linha que divide "coxa" (acima) de "perna" (abaixo) no desenho
-
-# Posição X de cada trilha (a perna fica centrada; lados diferentes só
-# espelham a posição X das trilhas medial/lateral)
-X_PROFUNDA = 200
-X_MAGNA = 150
-X_PARVA = 250
+MAPA_FRACAO_SEGMENTO = {
+    "proximal da coxa": 0.08, "médio da coxa": 0.20, "distal da coxa": 0.32,
+    "proximal da perna": 0.62, "médio da perna": 0.78, "distal da perna": 0.94,
+}
 
 
-def _y_para_segmento(segmento: str, eixo: tuple[int, int]) -> int:
-    """Converte um nome de segmento (ex.: 'proximal da coxa') numa posição Y aproximada."""
-    y_topo, y_base = eixo
-    mapa_fracao = {
-        "proximal da coxa": 0.10, "médio da coxa": 0.25, "distal da coxa": 0.40,
-        "proximal da perna": 0.60, "médio da perna": 0.75, "distal da perna": 0.92,
-    }
-    fracao = mapa_fracao.get(segmento, 0.5)
-    return int(y_topo + fracao * (y_base - y_topo))
+def _y_para_segmento(segmento: str) -> int:
+    """Converte um nome de segmento (ex.: 'proximal da coxa') numa posição Y (0..ALTURA_PERNA)."""
+    fracao = MAPA_FRACAO_SEGMENTO.get(segmento, 0.5)
+    return int(fracao * ALTURA_PERNA)
+
+
+def _largura_contorno(y: int) -> float:
+    """Largura (afastamento do eixo central) do contorno da perna na altura y."""
+    if y <= Y_JOELHO:
+        frac = y / Y_JOELHO
+        return X_VIRILHA + frac * (X_JOELHO - X_VIRILHA)
+    frac = (y - Y_JOELHO) / (ALTURA_PERNA - Y_JOELHO)
+    return X_JOELHO + frac * (X_TORNOZELO - X_JOELHO)
+
+
+def _x_contorno_perna(y: int, lado: int) -> float:
+    """
+    Posição X do contorno externo da perna na altura y (0=virilha,
+    ALTURA_PERNA=tornozelo). lado = -1 (esquerda do eixo) ou +1 (direita).
+    """
+    return lado * _largura_contorno(y)
+
+
+def _x_trilha(y: int, lado: int, fracao_interna: float) -> float:
+    """
+    Posição X de uma trilha (magna/parva/profunda) no interior do contorno
+    da perna nessa altura y. fracao_interna vai de 0 (na linha média/centro)
+    a 1 (colado na borda interna, respeitando MARGEM_BORDA) — isso garante
+    que a trilha nunca seja desenhada fora da silhueta, mesmo perto do
+    tornozelo onde a perna é mais estreita.
+    """
+    largura_disponivel = max(_largura_contorno(y) - MARGEM_BORDA, 2)
+    return lado * fracao_interna * largura_disponivel
 
 
 @dataclass
@@ -418,7 +467,7 @@ class TracoVenograma:
     x2: float
     y2: float
     cor: str
-    largura: float = 7
+    largura: float = 6
 
     @property
     def tem_comprimento(self) -> bool:
@@ -426,7 +475,7 @@ class TracoVenograma:
 
     def to_svg(self) -> str:
         return (
-            f'<line x1="{self.x1}" y1="{self.y1}" x2="{self.x2}" y2="{self.y2}" '
+            f'<line x1="{self.x1:.1f}" y1="{self.y1:.1f}" x2="{self.x2:.1f}" y2="{self.y2:.1f}" '
             f'stroke="{self.cor}" stroke-width="{self.largura}" stroke-linecap="round" />'
         )
 
@@ -436,114 +485,276 @@ class PontoVenograma:
     x: float
     y: float
     cor: str = COR_PERFURANTE
-    raio: float = 7
+    raio: float = 6
     titulo: str = ""
 
     def to_svg(self) -> str:
         titulo_svg = f"<title>{html.escape(self.titulo)}</title>" if self.titulo else ""
         return (
-            f'<circle cx="{self.x}" cy="{self.y}" r="{self.raio}" '
-            f'fill="{self.cor}" stroke="#FFFFFF" stroke-width="1.5">{titulo_svg}</circle>'
+            f'<circle cx="{self.x:.1f}" cy="{self.y:.1f}" r="{self.raio}" '
+            f'fill="{self.cor}" stroke="#FFFFFF" stroke-width="1.3">{titulo_svg}</circle>'
         )
 
 
-def gerar_elementos_venograma(dados: "DadosExame") -> tuple[list[TracoVenograma], list[PontoVenograma]]:
+def _silhueta_perna_svg(lado: int) -> str:
+    """Contorno esquemático de uma perna (guia visual), no lado indicado (-1 esquerda, +1 direita)."""
+    x_v = X_VIRILHA * lado
+    x_j = X_JOELHO * lado
+    x_t = X_TORNOZELO * lado
+    x_pe = (X_TORNOZELO + 10) * lado    # ponta do pé, um pouco mais larga que o tornozelo
+    x_v_int = (X_VIRILHA - 9) * lado    # borda interna na virilha (mais perto do eixo central)
+    x_j_int = (X_JOELHO - 14) * lado    # borda interna no joelho
+    x_t_int = (X_TORNOZELO - 9) * lado  # borda interna no tornozelo
+    y_topo = 4
+    y_pe = ALTURA_PERNA + 14
+    return (
+        f'<path d="M {x_v_int:.0f} {y_topo} '
+        f'L {x_v:.0f} {y_topo + 8} '
+        f'L {x_j:.0f} {Y_JOELHO} '
+        f'L {x_t:.0f} {ALTURA_PERNA} '
+        f'L {x_pe:.0f} {y_pe} '
+        f'L {x_pe*0.3:.0f} {y_pe} '
+        f'L {x_t_int:.0f} {ALTURA_PERNA} '
+        f'L {x_j_int:.0f} {Y_JOELHO} '
+        f'Z" fill="#F0F4F6" stroke="{COR_GUIA}" stroke-width="1.5" />'
+    )
+
+
+def _linha_joelho_svg(lado: int) -> str:
+    x_j_int = (X_JOELHO - 14) * lado
+    x_j = X_JOELHO * lado
+    return f'<line x1="{x_j_int:.0f}" y1="{Y_JOELHO}" x2="{x_j:.0f}" y2="{Y_JOELHO}" stroke="{COR_GUIA}" stroke-width="1" stroke-dasharray="3,3" />'
+
+
+def gerar_elementos_perna(dados: DadosExame, lado_alvo: bool) -> tuple[list[TracoVenograma], list[PontoVenograma]]:
     """
-    Constrói a lista de traços/pontos do venograma a partir do estado
-    completo do exame. Pura (sem Streamlit), fácil de revisar e testar.
+    Gera traços/pontos para a perna que está sendo de fato examinada neste
+    laudo (lado_alvo=True). Para o lado espelhado (não examinado), retorna
+    apenas o trajeto normal (azul), já que não há dados clínicos para ele.
+    lado: -1 = esquerda do desenho (MIE), +1 = direita do desenho (MID).
     """
+    if not lado_alvo:
+        return [], []  # lado não examinado: desenhado separadamente como "normal"
+
+    achados = dados.achados_superficiais
     tracos: list[TracoVenograma] = []
     pontos: list[PontoVenograma] = []
-    achados = dados.achados_superficiais
+    return tracos, pontos  # populado pelas funções específicas de cada painel abaixo
 
-    # --- Sistema profundo ---
-    y0, y1 = EIXO_PROFUNDO
-    if dados.sp_status == "Não" and dados.sp_veias:
-        tracos.append(TracoVenograma(X_PROFUNDA, y0, X_PROFUNDA, y1, COR_TROMBO, largura=11))
-    else:
-        tracos.append(TracoVenograma(X_PROFUNDA, y0, X_PROFUNDA, y1, COR_NORMAL, largura=9))
 
-    # --- Safena magna ---
-    ym0, ym1 = EIXO_MAGNA
+def _tracos_magna(d: DadosExame, lado: int, fracao: float = 0.55) -> list[TracoVenograma]:
+    achados = d.achados_superficiais
+    tracos: list[TracoVenograma] = []
+
+    def pt(y):
+        return (_x_trilha(y, lado, fracao), y)
+
     if "Safenectomia Magna Total" in achados:
-        pass  # veia removida — não desenha trajeto
-    elif "Safenectomia Magna Parcial" in achados:
-        # Mantém só o terço distal da perna (trecho não operado)
-        y_corte = int(ym0 + 0.75 * (ym1 - ym0))
-        tracos.append(TracoVenograma(X_MAGNA, y_corte, X_MAGNA, ym1, COR_NORMAL))
-    elif "Safena Magna - Incompetência Total" in achados:
-        tracos.append(TracoVenograma(X_MAGNA, ym0, X_MAGNA, ym1, COR_REFLUXO))
-    elif any(a in achados for a in ("Safena Magna - Incompetência Parcial", "Safena Magna - Incompetência Segmentar")):
-        y_inicio = ym0 if dados.magna_jsf_incompetente else _y_para_segmento(dados.magna_seg_origem, EIXO_MAGNA)
-        y_fim = _y_para_segmento(dados.magna_seg_extensao, EIXO_MAGNA)
-        tracos.append(TracoVenograma(X_MAGNA, ym0, X_MAGNA, y_inicio, COR_NORMAL))
-        tracos.append(TracoVenograma(X_MAGNA, min(y_inicio, y_fim), X_MAGNA, max(y_inicio, y_fim), COR_REFLUXO))
-        tracos.append(TracoVenograma(X_MAGNA, y_fim, X_MAGNA, ym1, COR_NORMAL))
-        for seg in dados.magna_segmentos_extra:
-            ys = _y_para_segmento(seg.seg_origem, EIXO_MAGNA)
-            ye = _y_para_segmento(seg.seg_extensao, EIXO_MAGNA)
-            tracos.append(TracoVenograma(X_MAGNA + 14, min(ys, ye), X_MAGNA + 14, max(ys, ye), COR_REFLUXO, largura=5))
-    else:
-        tracos.append(TracoVenograma(X_MAGNA, ym0, X_MAGNA, ym1, COR_NORMAL))
+        return tracos
+    if "Safenectomia Magna Parcial" in achados:
+        y_corte = int(0.70 * ALTURA_PERNA)
+        x1, y1 = pt(y_corte)
+        x2, y2 = pt(ALTURA_PERNA)
+        tracos.append(TracoVenograma(x1, y1, x2, y2, COR_NORMAL))
+        return tracos
+    if "Safena Magna - Incompetência Total" in achados:
+        x1, y1 = pt(0)
+        x2, y2 = pt(ALTURA_PERNA)
+        tracos.append(TracoVenograma(x1, y1, x2, y2, COR_REFLUXO))
+        return tracos
+    if any(a in achados for a in ("Safena Magna - Incompetência Parcial", "Safena Magna - Incompetência Segmentar")):
+        y_inicio = 0 if d.magna_jsf_incompetente else _y_para_segmento(d.magna_seg_origem)
+        y_fim = _y_para_segmento(d.magna_seg_extensao)
+        y_a, y_b = min(y_inicio, y_fim), max(y_inicio, y_fim)
+        if y_a > 0:
+            tracos.append(TracoVenograma(*pt(0), *pt(y_a), COR_NORMAL))
+        tracos.append(TracoVenograma(*pt(y_a), *pt(y_b), COR_REFLUXO))
+        if y_b < ALTURA_PERNA:
+            tracos.append(TracoVenograma(*pt(y_b), *pt(ALTURA_PERNA), COR_NORMAL))
+        for seg in d.magna_segmentos_extra:
+            ys, ye = _y_para_segmento(seg.seg_origem), _y_para_segmento(seg.seg_extensao)
+            x1, y1 = _x_trilha(min(ys, ye), lado, fracao + 0.12), min(ys, ye)
+            x2, y2 = _x_trilha(max(ys, ye), lado, fracao + 0.12), max(ys, ye)
+            tracos.append(TracoVenograma(x1, y1, x2, y2, COR_REFLUXO, largura=4))
+        return tracos
 
-    # --- Safena parva ---
-    yp0, yp1 = EIXO_PARVA
+    x1, y1 = pt(0)
+    x2, y2 = pt(ALTURA_PERNA)
+    tracos.append(TracoVenograma(x1, y1, x2, y2, COR_NORMAL))
+    return tracos
+
+
+def _tracos_parva(d: DadosExame, lado: int, fracao: float = 0.75) -> list[TracoVenograma]:
+    achados = d.achados_superficiais
+    tracos: list[TracoVenograma] = []
+
+    def pt(y):
+        return (_x_trilha(y, lado, fracao), y)
+
+    y0 = Y_JOELHO  # parva só existe a partir do joelho
+
     if "Safenectomia Parva Total" in achados:
-        pass
-    elif "Safenectomia Parva Parcial" in achados:
-        y_corte = int(yp0 + 0.5 * (yp1 - yp0))
-        tracos.append(TracoVenograma(X_PARVA, y_corte, X_PARVA, yp1, COR_NORMAL))
-    elif "Safena Parva - Incompetência Total" in achados:
-        tracos.append(TracoVenograma(X_PARVA, yp0, X_PARVA, yp1, COR_REFLUXO))
-    elif "Safena Parva - Incompetência Parcial" in achados:
-        y_fim = _y_para_segmento(dados.parva_extensao_segmento, EIXO_PARVA)
-        tracos.append(TracoVenograma(X_PARVA, yp0, X_PARVA, y_fim, COR_REFLUXO))
-        tracos.append(TracoVenograma(X_PARVA, y_fim, X_PARVA, yp1, COR_NORMAL))
-    else:
-        tracos.append(TracoVenograma(X_PARVA, yp0, X_PARVA, yp1, COR_NORMAL))
+        return tracos
+    if "Safenectomia Parva Parcial" in achados:
+        y_corte = int(y0 + 0.5 * (ALTURA_PERNA - y0))
+        tracos.append(TracoVenograma(*pt(y_corte), *pt(ALTURA_PERNA), COR_NORMAL))
+        return tracos
+    if "Safena Parva - Incompetência Total" in achados:
+        tracos.append(TracoVenograma(*pt(y0), *pt(ALTURA_PERNA), COR_REFLUXO))
+        return tracos
+    if "Safena Parva - Incompetência Parcial" in achados:
+        y_fim = max(y0, _y_para_segmento(d.parva_extensao_segmento))
+        tracos.append(TracoVenograma(*pt(y0), *pt(y_fim), COR_REFLUXO))
+        if y_fim < ALTURA_PERNA:
+            tracos.append(TracoVenograma(*pt(y_fim), *pt(ALTURA_PERNA), COR_NORMAL))
+        return tracos
 
-    # --- Perfurantes (pontos) ---
-    contador_regiao: dict[tuple[str, str], int] = {}
-    for p in dados.perfurantes:
+    tracos.append(TracoVenograma(*pt(y0), *pt(ALTURA_PERNA), COR_NORMAL))
+    return tracos
+
+
+def _tracos_profundo(d: DadosExame, lado: int) -> list[TracoVenograma]:
+    cor = COR_TROMBO if (d.sp_status == "Não" and d.sp_veias) else COR_NORMAL
+    largura = 7 if cor == COR_TROMBO else 5
+    x1, y1 = _x_trilha(0, lado, 0.05), 0
+    x2, y2 = _x_trilha(ALTURA_PERNA, lado, 0.05), ALTURA_PERNA
+    return [TracoVenograma(x1, y1, x2, y2, cor, largura=largura)]
+
+
+def _pontos_perfurantes(d: DadosExame, lado: int) -> list[PontoVenograma]:
+    pontos: list[PontoVenograma] = []
+    contador: dict[tuple[str, str], int] = {}
+    for p in d.perfurantes:
         regiao = (p.localizacao_norm, p.face.lower())
-        indice = contador_regiao.get(regiao, 0)
-        contador_regiao[regiao] = indice + 1
-        deslocamento = indice * 22  # separa pontos repetidos na mesma região
-
-        y_base = (Y_JOELHO - 70) if p.localizacao_norm == "coxa" else (Y_JOELHO + 90)
-        y = y_base - deslocamento if p.localizacao_norm == "coxa" else y_base + deslocamento
-        x = (X_MAGNA - 8) if p.face.lower() in ("medial", "anterior") else (X_PARVA + 8)
+        idx = contador.get(regiao, 0)
+        contador[regiao] = idx + 1
+        y_base = (Y_JOELHO * 0.6) if p.localizacao_norm == "coxa" else (Y_JOELHO + (ALTURA_PERNA - Y_JOELHO) * 0.5)
+        y = y_base + idx * 30
+        fracao_x = 0.50 if p.face.lower() in ("medial", "anterior") else 0.85
+        x = _x_trilha(y, lado, fracao_x)
         pontos.append(PontoVenograma(
             x=x, y=y,
             titulo=f"Perfurante: {p.distancia_cm} cm da {p.referencia.lower()}, face {p.face.lower()} da {p.localizacao.lower()}",
         ))
+    return pontos
 
-    return tracos, pontos
+
+def _rotulo_svg(x: float, y: float, texto: str, lado: int) -> str:
+    ancora = "start" if lado > 0 else "end"
+    dx = 6 * lado
+    return (
+        f'<text x="{x + dx:.0f}" y="{y:.0f}" font-size="9.5" fill="#5B6B79" '
+        f'font-family="IBM Plex Mono, monospace" text-anchor="{ancora}" dominant-baseline="middle">{texto}</text>'
+    )
 
 
-def gerar_svg_venograma(dados: "DadosExame", lateralidade: str) -> str:
-    tracos, pontos = gerar_elementos_venograma(dados)
-    tracos = [t for t in tracos if t.tem_comprimento]  # remove segmentos degenerados (início == fim)
-    espelhar = lateralidade == "Esquerdo"
-    transform = ' transform="scale(-1,1) translate(-400,0)"' if espelhar else ""
+def gerar_painel_magna_jsf(d_alvo: DadosExame, lado_alvo: int) -> str:
+    """Painel 1: trajeto da safena magna + Junção Safeno-Femoral, MID e MIE lado a lado."""
+    partes = []
+    for lado in (-1, 1):
+        sub = []
+        sub.append(_silhueta_perna_svg(lado))
+        sub.append(_linha_joelho_svg(lado))
+        if lado == lado_alvo:
+            for t in _tracos_magna(d_alvo, lado):
+                if t.tem_comprimento:
+                    sub.append(t.to_svg())
+        else:
+            x1, y1 = _x_trilha(0, lado, 0.55), 0
+            x2, y2 = _x_trilha(ALTURA_PERNA, lado, 0.55), ALTURA_PERNA
+            sub.append(TracoVenograma(x1, y1, x2, y2, COR_NORMAL).to_svg())
+        # Marca a junção (círculo na virilha) — vermelho se incompetente
+        jsf_incompetente = (
+            lado == lado_alvo and (
+                "Safena Magna - Incompetência Total" in d_alvo.achados_superficiais
+                or (d_alvo.algum(["Safena Magna - Incompetência Parcial", "Safena Magna - Incompetência Segmentar"])
+                    and d_alvo.magna_jsf_incompetente)
+            )
+        )
+        x_jsf, y_jsf = _x_trilha(0, lado, 0.55), 0
+        cor_jsf = COR_REFLUXO if jsf_incompetente else COR_NORMAL
+        sub.append(PontoVenograma(x_jsf, y_jsf, cor=cor_jsf, raio=8, titulo="Junção Safenofemoral").to_svg())
+        partes.append(f'<g transform="translate({lado * SEPARACAO_PERNAS}, 0)">{"".join(sub)}</g>')
+    return "".join(partes)
 
-    partes = [
-        '<svg viewBox="0 0 400 760" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px;">',
-        f'<g{transform}>',
-        # Silhueta esquemática da perna (apenas guia visual, não clínica)
-        '<path d="M 160 30 Q 200 10 240 30 L 250 420 Q 255 540 245 660 L 235 700 '
-        'L 165 700 L 155 660 Q 145 540 150 420 Z" '
-        'fill="#F0F4F6" stroke="#C7D3D9" stroke-width="2" />',
-        '<line x1="150" y1="420" x2="250" y2="420" stroke="#C7D3D9" stroke-width="1.5" stroke-dasharray="4,4" />',
-        '<text x="265" y="424" font-size="11" fill="#7A8A94" font-family="IBM Plex Mono, monospace">joelho</text>',
-        '<text x="200" y="22" font-size="11" fill="#7A8A94" font-family="IBM Plex Mono, monospace" text-anchor="middle">virilha</text>',
-        '<text x="200" y="716" font-size="11" fill="#7A8A94" font-family="IBM Plex Mono, monospace" text-anchor="middle">tornozelo</text>',
+
+def gerar_painel_superficial(d_alvo: DadosExame, lado_alvo: int) -> str:
+    """Painel 2: magna + parva + perfurantes, MID e MIE lado a lado."""
+    partes = []
+    for lado in (-1, 1):
+        sub = []
+        sub.append(_silhueta_perna_svg(lado))
+        sub.append(_linha_joelho_svg(lado))
+        if lado == lado_alvo:
+            for t in _tracos_magna(d_alvo, lado, fracao=0.45):
+                if t.tem_comprimento:
+                    sub.append(t.to_svg())
+            for t in _tracos_parva(d_alvo, lado, fracao=0.80):
+                if t.tem_comprimento:
+                    sub.append(t.to_svg())
+            for p in _pontos_perfurantes(d_alvo, lado):
+                sub.append(p.to_svg())
+        else:
+            for fracao in (0.45, 0.80):
+                y_ini = 0 if fracao == 0.45 else Y_JOELHO
+                x1, y1 = _x_trilha(y_ini, lado, fracao), y_ini
+                x2, y2 = _x_trilha(ALTURA_PERNA, lado, fracao), ALTURA_PERNA
+                sub.append(TracoVenograma(x1, y1, x2, y2, COR_NORMAL).to_svg())
+        partes.append(f'<g transform="translate({lado * SEPARACAO_PERNAS}, 0)">{"".join(sub)}</g>')
+    return "".join(partes)
+
+
+def gerar_painel_profundo(d_alvo: DadosExame, lado_alvo: int) -> str:
+    """Painel 3: sistema profundo rotulado (VFC/VFP/VFS/VP/VTA/VTP), MID e MIE lado a lado."""
+    partes = []
+    rotulos = [
+        (0.04, "VFC"), (0.18, "VFP"), (0.30, "VFS"),
+        (0.60, "VP"), (0.74, "VG"), (0.90, "VTA/VTP"),
     ]
-    for t in tracos:
-        partes.append(t.to_svg())
-    for p in pontos:
-        partes.append(p.to_svg())
-    partes.append("</g></svg>")
+    for lado in (-1, 1):
+        sub = []
+        sub.append(_silhueta_perna_svg(lado))
+        sub.append(_linha_joelho_svg(lado))
+        tracos = _tracos_profundo(d_alvo, lado) if lado == lado_alvo else [
+            TracoVenograma(_x_trilha(0, lado, 0.05), 0, _x_trilha(ALTURA_PERNA, lado, 0.05), ALTURA_PERNA, COR_NORMAL, largura=5)
+        ]
+        for t in tracos:
+            sub.append(t.to_svg())
+        for fracao_y, texto in rotulos:
+            y = fracao_y * ALTURA_PERNA
+            x = _x_trilha(y, lado, 0.05)
+            sub.append(_rotulo_svg(x, y, texto, lado))
+        partes.append(f'<g transform="translate({lado * SEPARACAO_PERNAS}, 0)">{"".join(sub)}</g>')
+    return "".join(partes)
+
+
+def gerar_svg_venograma(dados: DadosExame, lateralidade: str) -> str:
+    """Monta o SVG completo com os 3 painéis lado a lado, igual ao mapa de referência."""
+    lado_alvo = 1 if lateralidade == "Direito" else -1  # convenção: MID à direita do desenho, igual ao template
+
+    largura_painel = 150
+    altura_total = ALTURA_PERNA + 60
+    espacamento = 20
+    largura_total = largura_painel * 3 + espacamento * 2
+
+    titulos = ["SUPERFICIAL - JSF", "SUPERFICIAL", "SISTEMA PROFUNDO"]
+    geradores = [gerar_painel_magna_jsf, gerar_painel_superficial, gerar_painel_profundo]
+
+    partes = [f'<svg viewBox="0 0 {largura_total} {altura_total}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;">']
+
+    for i, (titulo, gerador) in enumerate(zip(titulos, geradores)):
+        offset_x = i * (largura_painel + espacamento) + largura_painel / 2
+        partes.append(
+            f'<text x="{offset_x}" y="14" font-size="10" font-weight="600" fill="#0B2942" '
+            f'font-family="IBM Plex Sans, sans-serif" text-anchor="middle">{titulo}</text>'
+        )
+        conteudo_painel = gerador(dados, lado_alvo)
+        partes.append(f'<g transform="translate({offset_x}, 32)">{conteudo_painel}</g>')
+        if i < 2:
+            x_linha = (i + 1) * largura_painel + i * espacamento + espacamento / 2
+            partes.append(f'<line x1="{x_linha}" y1="0" x2="{x_linha}" y2="{altura_total}" stroke="#DCE3E8" stroke-width="1" />')
+
+    partes.append("</svg>")
     return "\n".join(partes)
 
 
