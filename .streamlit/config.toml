@@ -1,0 +1,14 @@
+[theme]
+# Base do tema nativo do Streamlit — os widgets que não dá pra restylear
+# via CSS (dot do radio/checkbox, trilha do slider, spinner) herdam essas
+# cores automaticamente, em vez de ficar no vermelho padrão do Streamlit
+# (que destoava do resto da paleta definida em CSS_TEMA no app.py).
+base = "dark"
+primaryColor = "#4FA8D8"
+backgroundColor = "#10161F"
+secondaryBackgroundColor = "#1A222E"
+textColor = "#E7EAEE"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
