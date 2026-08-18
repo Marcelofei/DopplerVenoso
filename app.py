@@ -49,62 +49,75 @@ st.set_page_config(
 
 CSS_TEMA = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;650;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Tema escuro suave (graphite/slate) — pensado para uso prolongado em
-       ambiente clínico com baixa luminosidade ambiente. */
-    --color-bg: #0F172A;         /* fundo principal da página (slate-900) */
-    --color-surface: #1E293B;    /* cartões/painéis (slate-800) */
-    --color-surface-2: #243044;  /* superfícies um pouco mais claras (inputs, expanders) */
-    --color-ink: #E5E7EB;        /* texto principal claro */
-    --color-ink-soft: #CBD5E1;   /* texto secundário */
-    --color-muted: #94A3B8;      /* labels, hints */
-    --color-line: #334155;       /* divisores e bordas */
-    --color-accent: #38BDF8;     /* azul claro de destaque (sky-400) */
-    --color-accent-soft: #1E3A5F; /* fundo de tags/expanders abertos */
-    --color-danger: #F87171;     /* vermelho clínico claro (mais legível em fundo escuro) */
-    --color-danger-soft: #3F1D1D;
-    --color-success: #34D399;
-    --color-success-soft: #14302A;
-    --color-warning: #FBBF24;
-    --color-warning-soft: #3A2E10;
-    --font-display: 'IBM Plex Sans', sans-serif;
+    /* Paleta clínica sóbria: grafite azulado, sem tons "SaaS genérico"
+       (nada de roxo/violeta ou gradientes chapados). Pensada para uso
+       prolongado em ambiente de exame com luminosidade reduzida. */
+    --color-bg: #10161F;          /* fundo principal — quase preto, levemente azulado */
+    --color-surface: #1A222E;     /* cartões/painéis */
+    --color-surface-2: #212B39;   /* inputs, expanders */
+    --color-surface-raised: #232E3D; /* header, elementos elevados */
+    --color-ink: #E7EAEE;         /* texto principal */
+    --color-ink-soft: #C4CBD6;    /* texto secundário */
+    --color-muted: #8996A8;       /* labels, hints */
+    --color-line: #2D3947;        /* divisores e bordas */
+    --color-line-soft: #232C38;
+    --color-accent: #4FA8D8;      /* azul acinzentado — clínico, não "tech blue" */
+    --color-accent-strong: #7EC1E6;
+    --color-accent-soft: #1C3040; /* fundo de tags/expanders abertos */
+    --color-danger: #D97373;      /* vermelho terroso, menos "alerta de app" */
+    --color-danger-soft: #33201F;
+    --color-success: #5FAE8C;     /* verde acinzentado */
+    --color-success-soft: #1A2C26;
+    --color-warning: #C9A24B;
+    --color-warning-soft: #2E2818;
+    --font-display: 'Source Serif 4', Georgia, serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 }
 
 .stApp { background-color: var(--color-bg) !important; font-family: var(--font-body); }
 div[data-testid="stVerticalBlock"] > div.element-container { background-color: transparent; }
 #MainMenu, footer, header[data-testid="stHeader"] { background-color: transparent; }
 html, body, [class*="css"] { font-family: var(--font-body); }
+.block-container { padding-top: 2rem !important; max-width: 1240px !important; }
 
+/* ---------------------------------------------------------------- */
+/* Cabeçalho institucional                                          */
+/* ---------------------------------------------------------------- */
 .laudo-header {
-    background: linear-gradient(135deg, var(--color-ink) 0%, #0E3A5C 100%);
-    border-radius: 10px;
-    padding: 26px 30px 20px 30px;
-    margin-bottom: 22px;
-    box-shadow: 0 8px 24px -8px rgba(11, 41, 66, 0.35);
+    position: relative;
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-line);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px 20px 26px;
+    margin-bottom: 20px;
 }
 .laudo-header__eyebrow {
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
-    text-transform: uppercase; color: #9FC4D6; font-weight: 500; margin: 0 0 6px 0;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--color-accent-strong); font-weight: 500; margin: 0 0 6px 0;
 }
 .laudo-header__title {
-    font-family: var(--font-display); font-size: 24px; font-weight: 650;
+    font-family: var(--font-display); font-size: 25px; font-weight: 600;
     letter-spacing: -0.01em; color: #FFFFFF; margin: 0;
 }
-.laudo-header__sub { font-size: 13px; color: #C7D9E2; margin: 4px 0 0 0; }
+.laudo-header__sub { font-size: 13px; color: var(--color-ink-soft); margin: 4px 0 0 0; }
 .laudo-header__meta {
     display: flex; gap: 26px; margin-top: 16px; padding-top: 14px;
-    border-top: 1px solid rgba(255,255,255,0.14); flex-wrap: wrap;
+    border-top: 1px solid var(--color-line-soft); flex-wrap: wrap;
 }
 .laudo-header__meta-item { display: flex; flex-direction: column; gap: 2px; }
 .laudo-header__meta-label {
     font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #7FA8BC;
+    text-transform: uppercase; color: var(--color-muted);
 }
-.laudo-header__meta-value { font-family: var(--font-mono); font-size: 13px; color: #EAF2F5; font-weight: 500; }
+.laudo-header__meta-value { font-family: var(--font-mono); font-size: 13px; color: var(--color-ink); font-weight: 500; }
 
 h1, h2, h3 { font-family: var(--font-display) !important; }
 .secao-protocolo {
@@ -112,13 +125,14 @@ h1, h2, h3 { font-family: var(--font-display) !important; }
     padding-bottom: 10px; border-bottom: 1px solid var(--color-line);
 }
 .secao-protocolo__numero {
-    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
-    color: var(--color-accent); background: var(--color-accent-soft);
-    border-radius: 6px; padding: 3px 8px; line-height: 1.4; white-space: nowrap; margin-top: 2px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    color: var(--color-accent-strong); background: var(--color-accent-soft);
+    border-radius: var(--radius-sm); padding: 3px 8px; line-height: 1.4; white-space: nowrap; margin-top: 2px;
 }
 .secao-protocolo__texto h3 {
     margin: 0 !important; padding: 0 !important; border: none !important;
-    color: var(--color-ink) !important; font-size: 17px !important; font-weight: 600 !important;
+    color: var(--color-ink) !important; font-size: 16.5px !important; font-weight: 600 !important;
+    font-family: var(--font-body) !important;
 }
 .secao-protocolo__desc { font-size: 12px; color: var(--color-muted); margin: 2px 0 0 0; }
 
@@ -136,20 +150,21 @@ label { font-weight: 500 !important; font-size: 13.5px !important; color: var(--
 .laudo-header__meta-value {
     color: inherit !important;
 }
-.laudo-header__eyebrow { color: #9FC4D6 !important; }
+.laudo-header__eyebrow { color: var(--color-accent-strong) !important; }
 .laudo-header__title { color: #FFFFFF !important; }
-.laudo-header__sub { color: #C7D9E2 !important; }
-.laudo-header__meta-label { color: #7FA8BC !important; }
-.laudo-header__meta-value { color: #EAF2F5 !important; }
+.laudo-header__sub { color: var(--color-ink-soft) !important; }
+.laudo-header__meta-label { color: var(--color-muted) !important; }
+.laudo-header__meta-value { color: var(--color-ink) !important; }
 
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--color-surface); border: 1px solid var(--color-line);
-    border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
+div[data-testid="stVerticalBlockBorderWrapper"] > div { padding: 4px 2px; }
 
 .stTextArea textarea, .stTextInput input, .stNumberInput input {
     background-color: var(--color-surface-2) !important; color: var(--color-ink) !important;
-    border: 1.5px solid var(--color-line) !important; border-radius: 7px !important;
+    border: 1.5px solid var(--color-line) !important; border-radius: var(--radius-sm) !important;
     font-family: var(--font-mono) !important; font-size: 13.5px !important;
 }
 .stTextArea textarea::placeholder, .stTextInput input::placeholder, .stNumberInput input::placeholder {
@@ -159,26 +174,40 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     border-color: var(--color-accent) !important; box-shadow: 0 0 0 3px var(--color-accent-soft) !important;
 }
 
-/* Selects e multiselects: fundo escuro tanto no campo quanto no popover de opções */
-.stSelectbox div[data-baseweb="select"] > div,
-.stMultiSelect div[data-baseweb="select"] > div {
+/* Selects e multiselects — Streamlit ≥1.5x usa combobox baseado em
+   react-aria (sem os antigos data-baseweb). O campo em si e o popover de
+   opções são elementos separados no DOM (o popover fica direto sob
+   <body>), então os seletores por role/testid abaixo cobrem os dois. */
+.react-aria-ComboBox [role="group"] {
     background-color: var(--color-surface-2) !important;
     border: 1.5px solid var(--color-line) !important;
-    border-radius: 7px !important;
-    color: var(--color-ink) !important;
+    border-radius: var(--radius-sm) !important;
 }
-ul[role="listbox"], div[data-baseweb="popover"] ul, div[data-baseweb="menu"] {
+.react-aria-ComboBox input {
+    background-color: transparent !important; color: var(--color-ink) !important;
+}
+.react-aria-ComboBox input::placeholder { color: var(--color-muted) !important; opacity: 0.8; }
+.react-aria-ComboBox button svg { color: var(--color-muted) !important; }
+[data-testid="stMultiSelectTagsContainer"] span[data-tag] {
+    background-color: var(--color-accent-soft) !important; color: var(--color-accent-strong) !important;
+    border-radius: 5px !important; border: 1px solid var(--color-accent) !important;
+}
+[data-testid="stMultiSelectTagsContainer"] span[data-tag] button { color: var(--color-accent-strong) !important; }
+
+/* Popover que envolve o listbox (react-aria monta com fundo branco por
+   padrão — sem isso sobra uma moldura branca em volta da caixa escura). */
+div[role="listbox"], div[role="listbox"] > div, div:has(> div[role="listbox"]) {
     background-color: var(--color-surface-2) !important;
     border: 1px solid var(--color-line) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5) !important;
 }
-ul[role="listbox"] li, div[data-baseweb="menu"] li {
-    background-color: transparent !important;
-    color: var(--color-ink) !important;
+div[role="option"] {
+    color: var(--color-ink) !important; background-color: transparent !important;
 }
-ul[role="listbox"] li:hover, div[data-baseweb="menu"] li:hover {
+div[role="option"]:hover, div[role="option"][aria-selected="true"] {
     background-color: var(--color-accent-soft) !important;
 }
-span[data-baseweb="tag"] { background-color: var(--color-accent) !important; color: #0F172A !important; border-radius: 5px !important; }
 
 /* Radio/checkbox: marcadores precisam ser visíveis no escuro */
 .stRadio div[role="radiogroup"] label, .stCheckbox label { color: var(--color-ink) !important; }
@@ -194,35 +223,48 @@ div[data-testid="stExpander"] {
 div[data-testid="stExpander"] > div { background-color: var(--color-surface) !important; }
 
 .stButton button {
-    border-radius: 7px !important; font-weight: 600 !important; font-family: var(--font-body) !important;
+    border-radius: var(--radius-sm) !important; font-weight: 600 !important; font-family: var(--font-body) !important;
     border: 1.5px solid var(--color-line) !important; background-color: var(--color-surface-2) !important;
     color: var(--color-ink) !important; transition: all 0.12s ease;
 }
-.stButton button:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
+.stButton button:hover { border-color: var(--color-accent) !important; color: var(--color-accent-strong) !important; }
 
+/* "Reiniciar paciente" — ação destrutiva, mas discreta até ser confirmada;
+   nada de botão vermelho cheio disparando alarme visual o tempo todo. */
 button[kind="primary"] {
-    background-color: var(--color-danger) !important; color: #0F172A !important; border: none !important;
-    border-radius: 7px !important; box-shadow: 0 2px 6px -1px rgba(248, 113, 113, 0.25) !important;
-    font-weight: 700 !important;
+    background-color: transparent !important; color: var(--color-muted) !important;
+    border: 1.5px solid var(--color-line) !important; border-radius: var(--radius-sm) !important;
+    font-weight: 500 !important; font-size: 13px !important; box-shadow: none !important;
 }
-button[kind="primary"]:hover { background-color: #FCA5A5 !important; }
+button[kind="primary"]:hover {
+    border-color: var(--color-danger) !important; color: var(--color-danger) !important;
+    background-color: var(--color-danger-soft) !important;
+}
 
 .stDownloadButton button, .copy-btn {
-    background-color: var(--color-success) !important; color: #0F172A !important; border-radius: 8px !important;
-    font-weight: 700 !important; font-family: var(--font-body) !important; height: 46px !important;
-    width: 100% !important; border: none !important; box-shadow: 0 4px 10px -3px rgba(52, 211, 153, 0.25) !important;
-    cursor: pointer; transition: background-color 0.12s ease;
+    background-color: var(--color-surface-2) !important; color: var(--color-ink) !important;
+    border: 1.5px solid var(--color-accent) !important; border-radius: var(--radius-sm) !important;
+    font-weight: 600 !important; font-family: var(--font-body) !important; height: 44px !important;
+    width: 100% !important; box-shadow: none !important;
+    cursor: pointer; transition: all 0.12s ease;
 }
-.stDownloadButton button:hover, .copy-btn:hover { background-color: #6EE7B7 !important; }
+.stDownloadButton button:hover, .copy-btn:hover {
+    background-color: var(--color-accent) !important; color: #0E1620 !important;
+}
 
 /* Alerts (st.warning / st.error / st.info / st.success) com cores legíveis no escuro */
-div[data-testid="stAlert"] { border-radius: 8px !important; border-left: 4px solid var(--color-accent) !important; }
+div[data-testid="stAlert"] { border-radius: var(--radius-sm) !important; border-left: 3px solid var(--color-accent) !important; }
 div[data-testid="stAlert"], div[data-testid="stAlertContainer"] {
     background-color: var(--color-surface-2) !important;
 }
 div[data-testid="stAlert"] p, div[data-testid="stAlert"] div { color: var(--color-ink) !important; font-weight: 500 !important; }
 
 hr { border-color: var(--color-line) !important; margin: 22px 0 !important; }
+
+/* Iframe do canvas de desenho: sem borda própria feia do navegador, e
+   centralizado no card (a largura do canvas é menor que o card, ver
+   CANVAS_LARGURA em app.py, para nunca ficar cortado). */
+.stCustomComponentV1 iframe { margin: 0 auto; display: block; }
 </style>
 """
 
@@ -294,10 +336,10 @@ STROKE_POR_COR = {
 
 FERRAMENTAS_DESENHO = ["transform", "line", "freedraw", "circle"]
 LABEL_FERRAMENTA = {
-    "transform": "🖱️ Selecionar/Mover",
-    "line": "📏 Linha",
-    "freedraw": "✏️ Lápis livre",
-    "circle": "⭕ Círculo",
+    "transform": "Selecionar / Mover",
+    "line": "Linha",
+    "freedraw": "Lápis livre",
+    "circle": "Círculo",
 }
 
 # Textos de ajuda — aparecem como ícone "?" ao lado do campo (parâmetro help=).
@@ -405,8 +447,15 @@ CHAVES_ESTADO_PACIENTE = ["perf_list", "magna_seg_list", "seg_k", "protocolo_num
 # do repositório e usada como fundo do canvas onde a assistente desenha
 # manualmente — não há mais overlay automático com base nos dados do exame.
 
-LARGURA_BASE = 1180
-ALTURA_BASE = 680
+LARGURA_BASE = 1178
+ALTURA_BASE = 678
+
+# Dimensões do canvas interativo — menores que a imagem nativa (mesma
+# proporção) para caber por inteiro dentro do iframe do componente de
+# desenho, que não redimensiona o próprio conteúdo, só o encolhe cortando
+# as bordas. Ver nota em `secao_venograma`.
+CANVAS_LARGURA = 980
+CANVAS_ALTURA = round(CANVAS_LARGURA * ALTURA_BASE / LARGURA_BASE)
 
 
 def _carregar_base_venograma() -> Image.Image:
@@ -748,21 +797,21 @@ def renderizar_cabecalho_institucional(lateralidade: str) -> None:
     st.markdown(
         f"""
         <div class="laudo-header">
-            <p class="laudo-header__eyebrow" style="color:#9FC4D6 !important; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; margin: 0 0 6px 0;">Ecografia Vascular · Sistema Venoso</p>
-            <h1 class="laudo-header__title" style="color:#FFFFFF !important; font-family: 'IBM Plex Sans', sans-serif; font-size: 26px; font-weight: 650; letter-spacing: -0.01em; margin: 0; padding: 0; border: none;">Laudo de Eco-Doppler Venoso</h1>
-            <p class="laudo-header__sub" style="color:#C7D9E2 !important; font-size: 13px; margin: 6px 0 0 0;">Assistente de preenchimento durante o exame — membro inferior</p>
-            <div class="laudo-header__meta" style="display: flex; gap: 26px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.14); flex-wrap: wrap;">
+            <p class="laudo-header__eyebrow" style="color:#7EC1E6 !important; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 500; margin: 0 0 6px 0;">Ecografia Vascular · Sistema Venoso</p>
+            <h1 class="laudo-header__title" style="color:#FFFFFF !important; font-family: 'Source Serif 4', Georgia, serif; font-size: 25px; font-weight: 600; letter-spacing: -0.01em; margin: 0; padding: 0; border: none;">Laudo de Eco-Doppler Venoso</h1>
+            <p class="laudo-header__sub" style="color:#C4CBD6 !important; font-size: 13px; margin: 6px 0 0 0;">Assistente de preenchimento durante o exame — membro inferior</p>
+            <div class="laudo-header__meta" style="display: flex; gap: 26px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #232C38; flex-wrap: wrap;">
                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="color:#7FA8BC !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Protocolo</span>
-                    <span style="color:#EAF2F5 !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{st.session_state['protocolo_numero']}</span>
+                    <span style="color:#8996A8 !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Protocolo</span>
+                    <span style="color:#E7EAEE !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{st.session_state['protocolo_numero']}</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="color:#7FA8BC !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Data</span>
-                    <span style="color:#EAF2F5 !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{data_str}</span>
+                    <span style="color:#8996A8 !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Data</span>
+                    <span style="color:#E7EAEE !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{data_str}</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="color:#7FA8BC !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Membro</span>
-                    <span style="color:#EAF2F5 !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{html.escape(lateralidade)}</span>
+                    <span style="color:#8996A8 !important; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Membro</span>
+                    <span style="color:#E7EAEE !important; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500;">{html.escape(lateralidade)}</span>
                 </div>
             </div>
         </div>
@@ -818,7 +867,7 @@ def secao_sistema_profundo() -> tuple[str, list[str], str]:
         )
         if not veias:
             st.warning(
-                "⚠️ Você marcou o sistema profundo como alterado, mas ainda não "
+                "Você marcou o sistema profundo como alterado, mas ainda não "
                 "selecionou nenhuma veia. Selecione ao menos uma — sem isso, o "
                 "laudo vai sair como se tudo estivesse normal."
             )
@@ -900,7 +949,7 @@ def _ui_segmentos_extra_magna() -> list[SegmentoMagnaExtra]:
             f"→ Extensão: {seg.seg_extensao}, {seg.dist_extensao} cm {seg.ref_extensao} "
             f"→ Drenagem: {seg.drenagem}"
         )
-        if col_del.button("🗑️", key=f"del_seg_{i}"):
+        if col_del.button("Remover", key=f"del_seg_{i}", use_container_width=True):
             st.session_state.magna_seg_list.pop(i)
             st.rerun()
 
@@ -980,7 +1029,7 @@ def secao_perfurantes() -> list[DadosPerfurante]:
         for i, p in enumerate(st.session_state.perf_list):
             col_info, col_del = st.columns([5, 1])
             col_info.info(p.to_texto())
-            if col_del.button("🗑️", key=f"del_perf_{i}"):
+            if col_del.button("Remover", key=f"del_perf_{i}", use_container_width=True):
                 st.session_state.perf_list.pop(i)
                 st.rerun()
 
@@ -1027,13 +1076,21 @@ def secao_venograma(d: DadosExame) -> None:
     peso = t3.slider("Espessura:", 1, 20, 6)
     stroke = STROKE_POR_COR[cor]
 
+    # O iframe do componente de canvas tem largura fixada em CSS pelo
+    # Streamlit (ela se adapta ao container, mas não redimensiona o que
+    # está desenhado dentro do canvas) — se pedíssemos o canvas na largura
+    # nativa da imagem (1178px), o conteúdo simplesmente fica cortado nas
+    # bordas do iframe. Por isso o canvas é aberto em CANVAS_LARGURA/ALTURA
+    # (menor, mesma proporção da imagem), que cabe inteiro mesmo em telas
+    # de notebook — a imagem final para download continua em resolução
+    # nativa (o traço manual é redimensionado de volta na composição).
     canvas_result = st_canvas(
         fill_color="rgba(255, 255, 255, 0)",
         stroke_width=peso,
         stroke_color=stroke,
         background_image=fundo,
-        height=ALTURA_BASE,
-        width=LARGURA_BASE,
+        height=CANVAS_ALTURA,
+        width=CANVAS_LARGURA,
         drawing_mode=tool,
         update_streamlit=True,
         key="canvas_venograma",
@@ -1070,7 +1127,9 @@ def secao_venograma(d: DadosExame) -> None:
 # =====================================================================
 
 def renderizar_barra_acoes() -> None:
-    _, col_btn = st.columns([6, 2])
+    # Faixa de ações compacta, alinhada à direita, logo abaixo do cabeçalho —
+    # em vez de uma barra de largura total só para um botão secundário.
+    _, col_btn = st.columns([9, 1.7])
     with col_btn:
         if st.button("Reiniciar paciente", type="primary", use_container_width=True):
             st.session_state["confirmar_reset"] = True
@@ -1132,12 +1191,14 @@ def main() -> None:
 
     laudo_final = gerar_laudo_completo(dados)
 
+    # Laudo e venograma em seções próprias, empilhadas em largura total —
+    # não lado a lado em meia coluna, onde o venograma (1178px de largura
+    # fixa) ficava cortado dentro de um espaço menor que o da imagem.
     with st.container(border=True):
-        c_laudo, c_ven = st.columns([1, 1])
-        with c_laudo:
-            secao_laudo_editavel(laudo_final)
-        with c_ven:
-            secao_venograma(dados)
+        secao_laudo_editavel(laudo_final)
+
+    with st.container(border=True):
+        secao_venograma(dados)
 
 
 if __name__ == "__main__":
